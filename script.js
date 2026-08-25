@@ -24,7 +24,15 @@ function log(message, type = 'info') {
 }
 
 function clearConsole() {
-    document.getElementById('console-output').innerHTML = '<div class="text-slate-500">// Терминал очищен.</div>';
+    // Очищаем консоль терминала
+    document.getElementById('console-output').innerHTML = '<div class="text-slate-500">// Терминал очищен. Данные сессии сброшены.</div>';
+
+    // Протокол безопасности: принудительно стираем API-ключ из поля ввода
+    const keyInput = document.getElementById('api-key');
+    if (keyInput.value !== '') {
+        keyInput.value = '';
+        log("ПРОТОКОЛ БЕЗОПАСНОСТИ: API-ключ удален из памяти терминала.", "error");
+    }
 }
 
 // --- 2. ЛОГИКА КОМПАРАТОРОВ (Из домашнего задания) ---
