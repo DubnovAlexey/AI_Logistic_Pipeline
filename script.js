@@ -14,7 +14,12 @@ function log(message, type = 'info') {
     };
 
     // Добавляем timestamp для реалистичности терминала
-    const time = new Date().toLocaleTimeString('ru-RU', { hour12: false, hour: "numeric", minute: "numeric", second: "numeric" });
+    const time = new Date().toLocaleTimeString('ru-RU', {
+        hour12: false,
+        hour: "numeric",
+        minute: "numeric",
+        second: "numeric"
+    });
 
     div.className = `${colors[type]} break-words`;
     div.innerHTML = `<span class="text-slate-600 opacity-50">[${time}]</span> <span class="text-cyan-600 ml-1">❯</span> ${message}`;
@@ -139,9 +144,9 @@ async function requestAiCustoms(cargoItem) {
         // Обновленный эндпоинт до версии gemini-3-flash-preview
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }]
+                contents: [{parts: [{text: prompt}]}]
             })
         });
 
@@ -205,9 +210,9 @@ async function requestAiManifest() {
         // Обновляем модель до gemini-3-flash-preview для лучшей логики
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }]
+                contents: [{parts: [{text: prompt}]}]
             })
         });
 
