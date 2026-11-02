@@ -1,5 +1,24 @@
 // --- 1. УТИЛИТЫ СИСТЕМЫ (Глобальные функции) ---
 
+// Модель и адрес Gemini в одном месте. Ключ уходит в заголовке, а не в адресе запроса.
+const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent';
+const MAX_ITEMS = 50;        // не больше строк в манифесте от нейросети
+const MAX_ITEM_LENGTH = 100; // не длиннее одной строки груза
+
+async function askGemini(apiKey, prompt) {
+    const response = await fetch(GEMINI_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'x-goog-api-key': apiKey},
+        body: JSON.stringify({contents: [{parts: [{text: prompt}]}]})
+    });
+    if (!response.ok) throw new Error(`Ошибка HTTP шлюза: ${response.status}`);
+    const result = await response.json();
+    const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (typeof text !== 'string') throw new Error('Нейросеть вернула пустой ответ');
+    return text;
+}
+
+// Весь текст — и свой, и от нейросети — выводится через textContent, поэтому HTML в нём не исполняется.
 function log(message, type = 'info') {
     const output = document.getElementById('console-output');
     const div = document.createElement('div');
@@ -22,7 +41,13 @@ function log(message, type = 'info') {
     });
 
     div.className = `${colors[type]} break-words`;
-    div.innerHTML = `<span class="text-slate-600 opacity-50">[${time}]</span> <span class="text-cyan-600 ml-1">❯</span> ${message}`;
+    const stamp = document.createElement('span');
+    stamp.className = 'text-slate-600 opacity-50';
+    stamp.textContent = `[${time}]`;
+    const arrow = document.createElement('span');
+    arrow.className = 'text-cyan-600 ml-1';
+    arrow.textContent = '❯';
+    div.append(stamp, ' ', arrow, ' ', message);
 
     output.appendChild(div);
     output.scrollTop = output.scrollHeight; // Автоскролл вниз
@@ -30,7 +55,10 @@ function log(message, type = 'info') {
 
 function clearConsole() {
     // Очищаем консоль терминала
-    document.getElementById('console-output').innerHTML = '<div class="text-slate-500">// Терминал очищен. Данные сессии сброшены.</div>';
+    const notice = document.createElement('div');
+    notice.className = 'text-slate-500';
+    notice.textContent = '// Терминал очищен. Данные сессии сброшены.';
+    document.getElementById('console-output').replaceChildren(notice);
 
     // Протокол безопасности: принудительно стираем API-ключ из поля ввода
     const keyInput = document.getElementById('api-key');
@@ -115,20 +143,26 @@ function addAiCustomsButton(cargoItem) {
     const output = document.getElementById('console-output');
     const btnDiv = document.createElement('div');
     btnDiv.className = 'mt-3 mb-4 border-l-2 border-indigo-500 pl-3';
-    btnDiv.innerHTML = `
-                <div class="text-indigo-400 text-xs mb-1">Доступна расширенная ИИ-диагностика:</div>
-                <button onclick="requestAiCustoms('${cargoItem}')" class="bg-indigo-900/30 hover:bg-indigo-800/50 border border-indigo-700/50 text-indigo-300 text-xs py-2 px-4 rounded-lg transition-all active:scale-95 flex items-center gap-2">
-                    <span>🔍</span> Просканировать "${cargoItem}" через ИИ-Таможню
-                </button>
-            `;
+    const hint = document.createElement('div');
+    hint.className = 'text-indigo-400 text-xs mb-1';
+    hint.textContent = 'Доступна расширенная ИИ-диагностика:';
+    const button = document.createElement('button');
+    button.className = 'bg-indigo-900/30 hover:bg-indigo-800/50 border border-indigo-700/50 text-indigo-300 text-xs py-2 px-4 rounded-lg transition-all active:scale-95 flex items-center gap-2';
+    button.textContent = `🔍 Просканировать "${cargoItem}" через ИИ-Таможню`;
+    // Груз передаётся в обработчик как значение, а не вклеивается в код атрибута onclick.
+    button.addEventListener('click', () => requestAiCustoms(cargoItem));
+    btnDiv.append(hint, button);
     output.appendChild(btnDiv);
     output.scrollTop = output.scrollHeight;
 }
 
 async function requestAiCustoms(cargoItem) {
     const terminal = document.getElementById('console-output');
-    let apiKey = document.getElementById('api-key').value.trim();
-    if (!apiKey) apiKey = ""; // Canvas подставит свой ключ автономно
+    const apiKey = document.getElementById('api-key').value.trim();
+    if (!apiKey) {
+        log("Для ИИ-таможни нужен Gemini API Key. Введите его в поле слева.", "error");
+        return;
+    }
 
     log(`\nИнициализация сканера... Анализ объекта: [${cargoItem}]`, "ai");
     terminal.parentElement.classList.add('active-scan');
@@ -141,20 +175,7 @@ async function requestAiCustoms(cargoItem) {
             Отвечай в строгом, роботизированном стиле без приветствий.`;
 
     try {
-        // Обновленный эндпоинт до версии gemini-3-flash-preview
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                contents: [{parts: [{text: prompt}]}]
-            })
-        });
-
-        if (!response.ok) throw new Error(`Ошибка HTTP шлюза: ${response.status}`);
-
-        const result = await response.json();
-        const report = result.candidates[0].content.parts[0].text;
-
+        const report = await askGemini(apiKey, prompt);
         log(`[ОТЧЕТ ТАМОЖНИ]: ${report}`, "success");
 
     } catch (error) {
@@ -180,24 +201,21 @@ function runLocalPipeline() {
 
 async function requestAiManifest() {
     const themeInput = document.getElementById('ai-theme').value.trim() || 'Киберпанк импланты';
-    let apiKey = document.getElementById('api-key').value.trim();
+    // Ключ вводит сам посетитель; в коде страницы ключей нет. Без ключа работает «Ручной режим».
+    const apiKey = document.getElementById('api-key').value.trim();
     const btn = document.getElementById('ai-btn');
     const terminal = document.getElementById('console-output');
 
-    // Если ключ не введен, используем встроенный (только для этого стенда)
     if (!apiKey) {
-        // ВНИМАНИЕ: В реальном проекте ключи НИКОГДА не хранят на фронтенде.
-        // Это сделано исключительно для автономности учебного стенда.
-        apiKey = ""; // В среде песочницы ключ подставится автоматически
-    }
-
-    if (!apiKey) {
-        log("Для ИИ-запроса требуется Gemini API Key. Введите его в поле.", "error");
+        log("Для ИИ-запроса требуется Gemini API Key. Введите его в поле или нажмите «Тестовый прогон».", "error");
         return;
     }
 
     btn.disabled = true;
-    btn.innerHTML = `<span class="animate-pulse">Установка Uplink-соединения...</span>`;
+    const waiting = document.createElement('span');
+    waiting.className = 'animate-pulse';
+    waiting.textContent = 'Установка Uplink-соединения...';
+    btn.replaceChildren(waiting);
     terminal.parentElement.classList.add('active-scan');
 
     log(`\nОтправка запроса к орбитальной нейросети...`, "ai");
@@ -207,24 +225,17 @@ async function requestAiManifest() {
     const prompt = `Ты логистический ИИ. Сгенерируй массив из 10 строк на тему "${themeInput}". Одна строка ОБЯЗАТЕЛЬНО должна быть пустой (просто 3 пробела "   "). Верни ТОЛЬКО валидный JSON массив строк. Никакого текста, никаких пояснений, без markdown-кавычек. Пример: ["слово1", "   ", "слово3"].`;
 
     try {
-        // Обновляем модель до gemini-3-flash-preview для лучшей логики
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                contents: [{parts: [{text: prompt}]}]
-            })
-        });
-
-        if (!response.ok) throw new Error(`Ошибка HTTP: ${response.status}`);
-
-        const result = await response.json();
-        let jsonText = result.candidates[0].content.parts[0].text;
+        let jsonText = await askGemini(apiKey, prompt);
 
         // Очистка от возможных markdown артефактов
         jsonText = jsonText.replace(/```json/g, '').replace(/```/g, '').trim();
 
-        const aiArray = JSON.parse(jsonText);
+        // Ответ нейросети — чужие данные: принимаем только массив строк разумного размера.
+        const parsed = JSON.parse(jsonText);
+        if (!Array.isArray(parsed) || !parsed.every(item => typeof item === 'string')) {
+            throw new Error('Нейросеть вернула не массив строк');
+        }
+        const aiArray = parsed.slice(0, MAX_ITEMS).map(item => item.slice(0, MAX_ITEM_LENGTH));
         log("Данные получены. Передаю на сборочную линию.", "success");
 
         // Запуск пайплайна с данными ИИ
@@ -235,7 +246,7 @@ async function requestAiManifest() {
         log(`Убедитесь, что API ключ валиден и нет ограничений CORS.`, "warning");
     } finally {
         btn.disabled = false;
-        btn.innerHTML = `Запросить манифест`;
+        btn.textContent = 'Запросить манифест';
         terminal.parentElement.classList.remove('active-scan');
     }
 }
