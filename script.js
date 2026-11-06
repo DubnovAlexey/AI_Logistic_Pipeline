@@ -6,7 +6,12 @@ const MAX_ITEMS = 50;        // не больше строк в манифест
 const MAX_ITEM_LENGTH = 100; // не длиннее одной строки груза
 
 async function askGemini(apiKey, prompt) {
+    // Запрос не держит кнопку заблокированной бесконечно при обрыве сети.
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
+    try {
     const response = await fetch(GEMINI_URL, {
+        signal: controller.signal,
         method: 'POST',
         headers: {'Content-Type': 'application/json', 'x-goog-api-key': apiKey},
         body: JSON.stringify({contents: [{parts: [{text: prompt}]}]})
@@ -16,6 +21,10 @@ async function askGemini(apiKey, prompt) {
     const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
     if (typeof text !== 'string') throw new Error('Нейросеть вернула пустой ответ');
     return text;
+    } catch (error) {
+        if (controller.signal.aborted) throw new Error('Шлюз не ответил за30секунд. Повторите запрос.');
+        throw error;
+    } finally { clearTimeout(timeout); }
 }
 
 // Весь текст — и свой, и от нейросети — выводится через textContent, поэтому HTML в нём не исполняется.

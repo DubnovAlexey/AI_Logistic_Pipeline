@@ -41,3 +41,5 @@ Open `index.html` in a browser, or serve the folder (`npx serve .`) and open the
 - A styled build of Tailwind instead of the CDN script.
 - A JSON response schema for the model (structured output) instead of cleaning the text.
 - The terminal look from the UNIVERSE portfolio.
+
+AI network requests time out after30seconds. A missing or stalled response returns control to the terminal; the manual pipeline remains independent of the API.

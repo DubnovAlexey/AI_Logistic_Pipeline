@@ -35,3 +35,5 @@
 .active-scan {
     animation: scan 2s infinite;
 }
+/* Системная настройка доступности отключает только декоративный сканер. */
+@media (prefers-reduced-motion: reduce) { .active-scan { animation: none; } }
