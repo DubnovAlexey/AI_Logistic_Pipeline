@@ -37,3 +37,30 @@
 }
 /* Системная настройка доступности отключает только декоративный сканер. */
 @media (prefers-reduced-motion: reduce) { .active-scan { animation: none; } }
+
+/* Ссылка на исходный код — как ещё одна команда терминала */
+.repo-link-line {
+    margin: 1.5rem auto 2rem;
+    text-align: center;
+}
+
+.repo-link {
+    display: inline-block;
+    padding: 0.5rem 0.9rem;
+    border: 1px solid #334155;
+    border-radius: 0.4rem;
+    background: #0f172a;
+    color: #34d399;
+    font: 0.85rem/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    text-decoration: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.repo-link span { color: #64748b; }
+
+.repo-link:hover,
+.repo-link:focus-visible {
+    border-color: #34d399;
+    box-shadow: 0 0 12px rgba(52, 211, 153, 0.35);
+    outline: none;
+}
