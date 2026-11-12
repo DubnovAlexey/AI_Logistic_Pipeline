@@ -1,6 +1,8 @@
+<!--suppress MarkdownUnresolvedFileReference -->
+
 # AI Logistic Pipeline
 
-[English](#english) · [Русский](#russian) · [עברית](#hebrew)
+[English](#english) · [Русский](#russian) · [עברית](#hebrew) · [Español](#spanish) · [Français](#french)
 
 <a name="english"></a>
 
@@ -159,3 +161,115 @@ HTML5 · JavaScript (ES2020) · Tailwind CSS (CDN) · Fetch API · Google Gemini
 בקשות AI מוגבלות ל-30 שניות; הצינור הידני אינו דורש בקשת API.
 
 </div>
+
+---
+
+<a name="spanish"></a>
+
+## Español
+
+**AI Logistic Pipeline — terminal logístico con IA**
+
+Un «terminal logístico» de ciencia ficción. Ordena una lista de cargas con los métodos de arrays de JavaScript y puede pedirle a Google Gemini que invente una lista de cargas y revise la más grande.
+
+**Demo:** https://dubnovalexey.github.io/AI_Logistic_Pipeline/
+
+### Recorrido rápido
+
+Pulse **Local Data** para procesar la lista de cargas incorporada sin clave. Siga la limpieza, la ordenación y la elección del elemento más largo; **Wipe Data** reinicia el terminal. Las llamadas a Gemini son opcionales.
+
+### Funciones
+
+- **El modo manual** funciona sin clave: por la cadena pasa una lista de prueba con líneas vacías y espacios.
+- **Despachador IA.** Usted escribe un tema y su propia clave de Gemini API. El modelo devuelve un array JSON con nombres de cargas. Antes de procesarlo se comprueba: es un array de cadenas, no más de 50, cada una de hasta 100 caracteres.
+- **Aduana IA:** con un clic el modelo escribe un breve informe sobre la carga más grande.
+- **Registro con aspecto de terminal**, con hora y colores de mensaje. Todo, incluidas las respuestas del modelo, se muestra como texto plano: el HTML que llega en los datos nunca se ejecuta.
+- **«Limpieza de emergencia»** vacía el registro y borra la clave del campo.
+
+### La cadena
+
+`every` (todos los elementos son cadenas) → `some` (sobredimensionado) → `forEach` (celdas vacías) → `map(trim)` → `filter` (quitar vacíos) → `sort` por longitud con un comparador flecha → `find` (el primero de más de 5) → `reduce` (el más largo).
+
+### Tecnologías
+
+HTML5 · JavaScript (ES2020) · Tailwind CSS (CDN) · Fetch API · Google Gemini API · GitHub Pages
+
+### Decisiones técnicas
+
+- Métodos de arrays y llamadas encadenadas, un comparador propio, `reduce` con valor inicial.
+- Petición REST al modelo de lenguaje. Su respuesta son datos ajenos: JSON estricto, validación, salida segura.
+- Los elementos del DOM se construyen uno a uno en lugar de insertar cadenas HTML.
+
+### Su clave de API
+
+La página no trae ninguna clave incorporada. La clave introducida va solo a Google, en la cabecera `x-goog-api-key`, y no se guarda en ningún sitio. Sin clave, use el modo manual.
+
+### Cómo ejecutarlo
+
+Abra `index.html` en el navegador o inicie un servidor local (`npx serve .`) y abra la dirección que muestre.
+
+### Planes
+
+Son próximos pasos propuestos, no funciones que ya existan.
+
+- **Visual:** separar con más claridad la ruta manual y la de IA, y los estados de espera, resultado y error, conservando el estilo de terminal.
+- **Ingeniería:** compilar Tailwind en local y validar la respuesta de la IA con un esquema JSON explícito.
+- **Funciones:** permitir al visitante editar o importar una lista corta de cargas y comparar el resultado de cada paso de la cadena.
+
+Las peticiones a la IA tienen un límite de 30 segundos; la cadena manual no necesita llamar a ninguna API.
+
+---
+
+<a name="french"></a>
+
+## Français
+
+**AI Logistic Pipeline — terminal logistique avec IA**
+
+Un « terminal logistique » de science-fiction. Il trie une liste de cargaisons avec les méthodes de tableaux de JavaScript et peut demander à Google Gemini d'inventer une liste de cargaisons et d'examiner la plus grande.
+
+**Démo :** https://dubnovalexey.github.io/AI_Logistic_Pipeline/
+
+### Visite rapide
+
+Appuyez sur **Local Data** pour traiter la liste intégrée sans clé. Suivez le nettoyage, le tri et le choix de l'élément le plus long ; **Wipe Data** remet le terminal à zéro. Les appels à Gemini sont facultatifs.
+
+### Fonctions
+
+- **Le mode manuel** marche sans clé : une liste de test avec des lignes vides et des espaces traverse la chaîne.
+- **Répartiteur IA.** Vous saisissez un thème et votre propre clé Gemini API. Le modèle renvoie un tableau JSON de noms de cargaisons. Avant le traitement, il est vérifié : c'est un tableau de chaînes, 50 au plus, chacune de 100 caractères au plus.
+- **Douane IA :** en un clic, le modèle rédige un court rapport sur la plus grande cargaison.
+- **Journal façon terminal**, avec l'heure et des couleurs de message. Tout, y compris les réponses du modèle, s'affiche en texte brut : le HTML venu des données n'est jamais exécuté.
+- **« Nettoyage d'urgence »** vide le journal et efface la clé du champ.
+
+### La chaîne
+
+`every` (tous les éléments sont des chaînes) → `some` (hors gabarit) → `forEach` (cases vides) → `map(trim)` → `filter` (retirer les vides) → `sort` par longueur avec un comparateur fléché → `find` (le premier de plus de 5) → `reduce` (le plus long).
+
+### Technologies
+
+HTML5 · JavaScript (ES2020) · Tailwind CSS (CDN) · Fetch API · Google Gemini API · GitHub Pages
+
+### Choix techniques
+
+- Méthodes de tableaux et appels chaînés, un comparateur maison, `reduce` avec une valeur initiale.
+- Requête REST au modèle de langage. Sa réponse est une donnée étrangère : JSON strict, validation, affichage sûr.
+- Les éléments du DOM sont construits un par un au lieu d'insérer des chaînes HTML.
+
+### Votre clé d'API
+
+La page ne contient aucune clé intégrée. La clé saisie part uniquement chez Google, dans l'en-tête `x-goog-api-key`, et n'est enregistrée nulle part. Sans clé, utilisez le mode manuel.
+
+### Lancer le projet
+
+Ouvrez `index.html` dans le navigateur ou lancez un serveur local (`npx serve .`) et ouvrez l'adresse qu'il affiche.
+
+### Projets
+
+Ce sont des étapes proposées, pas des fonctions déjà en place.
+
+- **Visuel :** séparer plus nettement la voie manuelle et la voie IA, ainsi que les états d'attente, de résultat et d'erreur, en gardant le style terminal.
+- **Ingénierie :** compiler Tailwind en local et valider la réponse de l'IA avec un schéma JSON explicite.
+- **Fonctions :** laisser le visiteur modifier ou importer une courte liste de cargaisons et comparer le résultat de chaque étape de la chaîne.
+
+Les requêtes à l'IA sont limitées à 30 secondes ; la chaîne manuelle n'a besoin d'aucune API.
