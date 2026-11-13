@@ -56,7 +56,7 @@
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.repo-link span { color: #64748b; }
+.repo-link span { color: #8391a7; }
 
 .repo-link:hover,
 .repo-link:focus-visible {

@@ -65,7 +65,7 @@ function log(message, type = 'info') {
 function clearConsole() {
     // Очищаем консоль терминала
     const notice = document.createElement('div');
-    notice.className = 'text-slate-500';
+    notice.className = 'text-slate-400';
     notice.textContent = '// Терминал очищен. Данные сессии сброшены.';
     document.getElementById('console-output').replaceChildren(notice);
 
